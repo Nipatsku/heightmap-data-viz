@@ -13,3 +13,5 @@ The 3D geometry was drawn with `Blender` (open source 3D modeling software):
 The goal was to simulate a sonar data visualization application, where Y coordinate represents the horizontal plane around the boat and color represents depth.
 
 The entire chart application is created with a single static `HTML` file, no installation or build required.
+
+The application is hosted using GitHub Pages and can be viewed [here](https://nipatsku.github.io/heightmap-data-viz/)
