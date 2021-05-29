@@ -14,4 +14,6 @@ The goal was to simulate a sonar data visualization application, where Y coordin
 
 The entire chart application is created with a single static `HTML` file, no installation or build required.
 
-The application is hosted using GitHub Pages and can be viewed [here](https://nipatsku.github.io/heightmap-data-viz/)
+The application is hosted using GitHub Pages and can be viewed [here](https://nipatsku.github.io/heightmap-data-viz/).
+
+Project is based on [LCJS html project template](https://github.com/Arction/lcjs-html-example)
