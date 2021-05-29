@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Using chart in HTML page</title>
+    <meta charset="utf-8" />
+
+    <!-- Flexbox styling to have the chart and header fill the page.
+        Chart will take as much space as possible. -->
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      .box {
+        display: flex;
+        flex-flow: column;
+        height: 100%;
+      }
+
+      .box .row.header {
+        flex: 0 1 auto;
+      }
+
+      .box .row.content {
+        flex: 1 1 auto;
+      }
+    </style>
+  </head>
+
+  <body class="box">
+    <!-- Create div to render the chart into-->
+    <div id="target" class="row content"></div>
+
+    <!--IIFE assembly (lcjs.iife.js) is a standalone JS file, 
+      which does not need any build tools, 
+      such as NPM, to be installed-->
+    <!--Script source must be defined in it's own script tag-->
+    <script src="lcjs.iife.js"></script>
+
+    <!--Actual chart related script tag-->
+    <script>
+      // Replace the contents of this script tag if you want to test code from our examples:
+      // https://www.arction.com/lightningchart-js-interactive-examples/
+
+      // Extract required parts from LightningChartJS.
+      const {
+        lightningChart,
+        ColorRGBA,
+        LUT,
+        PalettedFill,
+        emptyFill,
+        emptyLine,
+        AxisScrollStrategies,
+        LegendBoxBuilders,
+        SolidFill,
+        AxisTickStrategies,
+      } = lcjs; //Note: @arction/lcjs is not needed here, when using IIFE assembly
+
+      const chart2 = lightningChart()
+        .ChartXY({
+          containerId: "target",
+        })
+        .setTitleFillStyle(emptyFill);
+
+      fetch("heightmap.json")
+        .then((r) => r.json())
+        .then((data) => {
+          const { columns, rows, yMin, yMax, heightMap } = data;
+          console.log(`${columns}x${rows}`);
+
+          const palette = new PalettedFill({
+            lookupProperty: "value",
+            lut: new LUT({
+              interpolate: true,
+              units: "depth",
+              steps: [
+                {
+                  value: yMin,
+                  label: yMin.toFixed(1) + "m",
+                  color: ColorRGBA(0, 0, 0),
+                },
+                {
+                  value: yMax,
+                  label: yMax.toFixed(1) + "m",
+                  color: ColorRGBA(255, 0, 0),
+                },
+              ],
+            }),
+          });
+
+          const scrollingHeatmap = chart2
+            .addScrollingHeatmapGridSeries({
+              resolution: rows,
+              scrollDimension: "columns",
+              heatmapDataType: "intensity",
+              colorMode: "cell",
+              start: { x: 0, y: 0 },
+              step: { x: 100, y: 1 },
+            })
+            .setName("Scrolling Heatmap")
+            .setFillStyle(palette)
+            .setWireframeStyle(emptyFill);
+
+          chart2.getDefaultAxisY().setTickStrategy(AxisTickStrategies.Empty);
+
+          chart2
+            .getDefaultAxisX()
+            .setInterval(-columns * 100, 0)
+            .setScrollStrategy(AxisScrollStrategies.progressive)
+            .setTickStrategy(AxisTickStrategies.DateTime, (ticks) =>
+              ticks.setDateOrigin(new Date())
+            );
+
+          let iColumn = 0;
+          setInterval(() => {
+            const iColumnData = iColumn % columns;
+            const columnData = new Array(rows)
+              .fill(0)
+              .map((_, iRow) => heightMap[iColumnData][iRow]);
+            scrollingHeatmap.addIntensityValues([columnData]);
+            iColumn += 1;
+            scrollingHeatmap.setDataCleaningThreshold(iColumn - columns);
+          }, 100);
+
+          chart2
+            .addLegendBox(LegendBoxBuilders.HorizontalLegendBox)
+            .setBackground((background) =>
+              background
+                .setStrokeStyle(emptyLine)
+                .setFillStyle(new SolidFill({ color: ColorRGBA(0, 0, 0, 50) }))
+            )
+            .add(chart2);
+        });
+    </script>
+  </body>
+</html>
