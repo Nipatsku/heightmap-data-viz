@@ -91,27 +91,16 @@
           });
 
           const scrollingHeatmap = chart2
-            .addScrollingHeatmapGridSeries({
-              resolution: rows,
-              scrollDimension: "columns",
-              heatmapDataType: "intensity",
-              colorMode: "cell",
+            .addHeatmapSeries({
+              rows: rows,
+              columns: columns,
+              pixelate: false,
               start: { x: 0, y: 0 },
-              step: { x: 100, y: 1 },
+              end: { x: columns * 100, y: rows },
             })
             .setName("Scrolling Heatmap")
             .setFillStyle(palette)
             .setWireframeStyle(emptyFill);
-
-          chart2.getDefaultAxisY().setTickStrategy(AxisTickStrategies.Empty);
-
-          chart2
-            .getDefaultAxisX()
-            .setInterval(-columns * 100, 0)
-            .setScrollStrategy(AxisScrollStrategies.progressive)
-            .setTickStrategy(AxisTickStrategies.DateTime, (ticks) =>
-              ticks.setDateOrigin(new Date())
-            );
 
           let iColumn = 0;
           setInterval(() => {
@@ -119,9 +108,8 @@
             const columnData = new Array(rows)
               .fill(0)
               .map((_, iRow) => heightMap[iColumnData][iRow]);
-            scrollingHeatmap.addIntensityValues([columnData]);
+            scrollingHeatmap.addColumn(1, "value", [columnData]);
             iColumn += 1;
-            scrollingHeatmap.setDataCleaningThreshold(iColumn - columns);
           }, 100);
 
           chart2
